@@ -105,10 +105,6 @@ Los reportes de errores y las ideas son bienvenidos en [Issues](https://github.c
 
 Usa esta herramienta solo para contenido que tengas derecho a descargar. Respeta los términos de servicio de cada plataforma y las leyes de derechos de autor de tu país.
 
-## Licencia
-
-Indica aquí la licencia de tu proyecto.
-
 <div align="center">
 
 Hecho con Python y Tkinter por [eltender1227](https://github.com/eltender1227)
