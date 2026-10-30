@@ -1,6 +1,7 @@
-<div align="center">
+r1227/release<div align="center">
 <img src="icon.png" alt="YTLoader" width="96">
-# YTLoader
+
+YTLoader
  
 **Fast, Portable & Seamless Downloader**
  
@@ -13,7 +14,7 @@ Descargador de música y video para Windows, portable y con interfaz gráfica.
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![yt-dlp](https://img.shields.io/badge/Motor-yt--dlp-FF0000?style=for-the-badge)
  
-[Descargar](https://github.com/eltender1227/YTLoader-elTender1227/releases/latest) ·
+[Descargar](https://github.com/eltender1227/YTLoader-elTendes/latest) ·
 [Reportar un error](https://github.com/eltender1227/YTLoader-elTender1227/issues/new) ·
 [Ver novedades](https://github.com/eltender1227/YTLoader-elTender1227/releases)
  
