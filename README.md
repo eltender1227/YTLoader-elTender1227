@@ -80,12 +80,6 @@ python YTLoader.pyw
 
 Las librerías son opcionales: sin ellas se desactivan las miniaturas, las gráficas de disco o el cortador de clips, según corresponda.
 
-## Compilar el ejecutable
-
-```bash
-pyinstaller --noconsole --onedir --icon icon.ico YTLoader.pyw
-```
-
 ## Uso rápido
 
 1. Elige la pestaña de **Música** o **Video**.
