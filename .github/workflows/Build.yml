@@ -21,8 +21,12 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: 🔑 Dar permisos a Gradle
-      run: chmod +x gradlew
+    - name: 🛠️ Generar Gradle Wrapper si falta
+      run: |
+        if [ ! -f "gradlew" ]; then
+          gradle wrapper
+        fi
+        chmod +x gradlew
 
     - name: ⚙️ Compilar APK (Debug)
       run: ./gradlew assembleDebug --no-daemon
