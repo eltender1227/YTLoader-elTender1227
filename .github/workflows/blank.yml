@@ -21,22 +21,35 @@ jobs:
 
     - name: ⚙️ Instalar Gradle y Compilar
       run: |
-        # Actualizar e instalar gradle directamente en el servidor
         sudo apt-get update
         sudo apt-get install -y gradle
-        
-        # Buscar el archivo de configuración y compilar
+
+        # Buscar de forma inteligente la carpeta del proyecto Android
+        PROJECT_DIR=""
         if [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
-          gradle assembleDebug --no-daemon
+          PROJECT_DIR="."
         else
-          # Si está dentro de una subcarpeta, la busca y compila ahí
-          DIR=$(find . -name "build.gradle" -o -name "build.gradle.kts" -print -quit | xargs dirname)
-          cd "$DIR"
-          gradle assembleDebug --no-daemon
+          # Buscar la primera carpeta que contenga un build.gradle
+          FOUND_FILE=$(find . -name "build.gradle" -o -name "build.gradle.kts" -print -quit)
+          if [ -n "$FOUND_FILE" ]; then
+            PROJECT_DIR=$(dirname "$FOUND_FILE")
+          fi
         fi
+
+        if [ -z "$PROJECT_DIR" ]; then
+          echo "❌ No se encontró ningún archivo build.gradle en el repositorio."
+          exit 1
+        fi
+
+        echo "📂 Entrando al directorio del proyecto: $PROJECT_DIR"
+        cd "$PROJECT_DIR"
+        
+        # Compilar usando gradle directamente
+        gradle assembleDebug --no-daemon
 
     - name: 📦 Guardar APK
       uses: actions/upload-artifact@v4
       with:
         name: mi-apk-debug
         path: '**/build/outputs/apk/debug/*.apk'
+
