@@ -1,19 +1,35 @@
-name: Compilar APK de Android
+name: Compilar APK desde Release
 
 on:
   push:
-    branches: [ "main", "master" ]
-  pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
     - name: 🤖 Descargar repositorio
       uses: actions/checkout@v4
+
+    - name: 📥 Descargar ZIP desde GitHub Releases
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Buscando archivos ZIP en las Releases..."
+        # Descarga automática del archivo zip más reciente de tus releases
+        gh release download --pattern "*.zip" --repo ${{ github.repository }} || echo "No se encontró zip en releases"
+        
+        # Descomprimir el archivo zip descargado
+        if ls *.zip 1> /dev/null 2>&1; then
+          unzip -q "*.zip" -d proyecto_extraido
+          echo "✅ Archivo de release descomprimido con éxito."
+        else
+          echo "⚠️ Usando los archivos directos del repositorio..."
+        fi
 
     - name: ☕ Configurar Java JDK 17
       uses: actions/setup-java@v5
@@ -21,21 +37,22 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: 🔑 Dar permisos a Gradle
+    - name: ⚙️ Compilar APK (Debug Automático)
       run: |
-        if [ -f "gradlew" ]; then
-          chmod +x gradlew
-        elif [ -f "app/gradlew" ]; then
-          chmod +x app/gradlew
+        # Buscar dónde está el gradlew en todo el espacio de trabajo (incluyendo la carpeta extraída)
+        GRADLEW_PATH=$(find . -name "gradlew" -type f -print -quit)
+        
+        if [ -z "$GRADLEW_PATH" ]; then
+          echo "❌ No se encontró el archivo gradlew."
+          exit 1
         fi
-
-    - name: ⚙️ Compilar APK (Debug)
-      run: |
-        if [ -f "gradlew" ]; then
-          ./gradlew assembleDebug --no-daemon
-        else
-          cd app && ./gradlew assembleDebug --no-daemon
-        fi
+        
+        DIR_PATH=$(dirname "$GRADLEW_PATH")
+        echo "📂 Encontrado en la carpeta: $DIR_PATH"
+        
+        cd "$DIR_PATH"
+        chmod +x gradlew
+        ./gradlew assembleDebug --no-daemon
 
     - name: 📦 Guardar APK generado
       uses: actions/upload-artifact@v4
