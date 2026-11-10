@@ -1,4 +1,4 @@
-name: Compilar APK desde Release
+name: Compilar APK de Android
 
 on:
   push:
@@ -15,20 +15,14 @@ jobs:
     - name: 🤖 Descargar repositorio
       uses: actions/checkout@v4
 
-    - name: 📥 Descargar ZIP desde GitHub Releases
+    - name: 📥 Descargar ZIP desde GitHub Releases (Opcional)
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        echo "Buscando archivos ZIP en las Releases..."
-        # Descarga automática del archivo zip más reciente de tus releases
-        gh release download --pattern "*.zip" --repo ${{ github.repository }} || echo "No se encontró zip en releases"
-        
-        # Descomprimir el archivo zip descargado
+        gh release download --pattern "*.zip" --repo ${{ github.repository }} || true
         if ls *.zip 1> /dev/null 2>&1; then
           unzip -q "*.zip" -d proyecto_extraido
-          echo "✅ Archivo de release descomprimido con éxito."
-        else
-          echo "⚠️ Usando los archivos directos del repositorio..."
+          echo "✅ ZIP descomprimido."
         fi
 
     - name: ☕ Configurar Java JDK 17
@@ -37,20 +31,27 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: ⚙️ Compilar APK (Debug Automático)
+    - name: ⚙️ Compilar APK (Búsqueda y Generación Automática)
       run: |
-        # Buscar dónde está el gradlew en todo el espacio de trabajo (incluyendo la carpeta extraída)
-        GRADLEW_PATH=$(find . -name "gradlew" -type f -print -quit)
+        # Buscar dónde está el archivo build.gradle en el proyecto
+        BUILD_FILE=$(find . -name "build.gradle" -o -name "build.gradle.kts" -print -quit)
         
-        if [ -z "$GRADLEW_PATH" ]; then
-          echo "❌ No se encontró el archivo gradlew."
+        if [ -z "$BUILD_FILE" ]; then
+          echo "❌ No se encontró ningún archivo build.gradle en el repositorio o release."
           exit 1
         fi
         
-        DIR_PATH=$(dirname "$GRADLEW_PATH")
-        echo "📂 Encontrado en la carpeta: $DIR_PATH"
-        
+        DIR_PATH=$(dirname "$BUILD_FILE")
+        echo "📂 Proyecto localizado en la carpeta: $DIR_PATH"
         cd "$DIR_PATH"
+        
+        # Si no existe gradlew, instalar gradle temporalmente y crearlo
+        if [ ! -f "gradlew" ]; then
+          echo "⚠️ No se encontró gradlew. Generando wrapper automáticamente..."
+          sudo apt-get update && sudo apt-get install -y gradle
+          gradle wrapper
+        fi
+        
         chmod +x gradlew
         ./gradlew assembleDebug --no-daemon
 
